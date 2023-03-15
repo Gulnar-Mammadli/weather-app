@@ -115,4 +115,15 @@ public class ForecastService {
     }
 
 
+    public Place getNightForecast(String date, String place) throws IOException {
+
+        List<Forecast> list = getAll().getForecastList();
+        Optional<Place> result = list.stream()
+                .filter(forecast -> forecast.getDate().equals(date))
+                .flatMap(forecast ->
+                        forecast.getNight().getPlaceList().stream())
+                .filter(p -> p.getName().equals(place))
+                .findFirst();
+        return result.orElse(null);
+    }
 }

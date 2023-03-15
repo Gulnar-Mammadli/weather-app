@@ -39,6 +39,10 @@ public class ForecastController {
         return forecastService.getForecast(date, place);
     }
 
+    @GetMapping("/night/date/{date}/place/{place}")
+    public Place getNightForecast(@PathVariable String date, @PathVariable String place) throws IOException {
+        return forecastService.getNightForecast(date, place);
+    }
 
 }
 
