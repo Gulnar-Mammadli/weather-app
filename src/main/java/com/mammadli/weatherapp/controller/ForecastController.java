@@ -16,18 +16,11 @@ import java.util.List;
 @CrossOrigin("http://localhost:8081/")
 public class ForecastController {
 
-    public String current_date;
     private final ForecastService forecastService;
 
     @GetMapping("/getForecasts")
     public List<Forecast> getForecasts() throws IOException {
         return forecastService.getAll().getForecastList();
-    }
-
-    @GetMapping("/date")
-    public String getDate(@RequestParam String current_date) {
-        this.current_date = current_date;
-        return current_date;
     }
 
     @GetMapping("/min/{current_date}")
@@ -45,11 +38,6 @@ public class ForecastController {
     public Place getForecast(@PathVariable String date, @PathVariable String place) throws IOException {
         return forecastService.getForecast(date, place);
     }
-
-//    @GetMapping("/read")
-//    public void readAverageTemp() throws IOException{
-//         forecastService.readAverageTemperature();
-//    }
 
 
 }

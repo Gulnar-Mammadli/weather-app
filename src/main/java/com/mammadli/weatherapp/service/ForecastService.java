@@ -90,7 +90,6 @@ public class ForecastService {
     public void getAverageTemperature() throws IOException {
 
         LocalDate current_date = LocalDate.now();
-//        LocalDate next_Day = current_date.plusDays(1);
         String date = current_date.toString();
         Double averageMinTemperature = getAverageMinTemperature(date);
         Double averageMaxTemperature = getAverageMaxTemperature(date);
@@ -114,24 +113,6 @@ public class ForecastService {
         return result.orElse(null);
 
     }
-
-//    public void readAverageTemperature() throws IOException {
-//        File file = new File("average_temperature.txt");
-//        List<String> lines = Files.readAllLines(Paths.get(file.toURI()));
-//
-//        for (String line : lines) {
-//            Pattern pattern = Pattern.compile("Average temperatures for (.*): (\\d+\\.\\d+) \\(min\\), (\\d+\\.\\d+) \\(max\\)");
-//            Matcher matcher = pattern.matcher(line);
-//
-//            if (matcher.matches()) {
-//                String date = matcher.group(1);
-//                double averageMin = Double.parseDouble(matcher.group(2));
-//                double averageMax = Double.parseDouble(matcher.group(3));
-//
-//                System.out.printf("Average temperatures for %s: %f (min), %f (max)\n", date, averageMin, averageMax);
-//            }
-//        }
-//    }
 
 
 }
