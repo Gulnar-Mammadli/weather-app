@@ -108,7 +108,8 @@ public class ForecastService {
                 .filter(forecast -> forecast.getDate().equals(date))
                 .flatMap(forecast ->
                         forecast.getDay().getPlaceList().stream())
-                .filter(p -> p.getName().equals(place))
+                .filter(p -> p.getName().replaceAll("[^a-zA-Z]+", "").trim()
+                        .equalsIgnoreCase(place.replaceAll("[^a-zA-Z]+", "").trim()))
                 .findFirst();
         return result.orElse(null);
 
@@ -122,7 +123,8 @@ public class ForecastService {
                 .filter(forecast -> forecast.getDate().equals(date))
                 .flatMap(forecast ->
                         forecast.getNight().getPlaceList().stream())
-                .filter(p -> p.getName().equals(place))
+                .filter(p -> p.getName().replaceAll("[^a-zA-Z]+", "").trim()
+                        .equalsIgnoreCase(place.replaceAll("[^a-zA-Z]+", "").trim()))
                 .findFirst();
         return result.orElse(null);
     }
