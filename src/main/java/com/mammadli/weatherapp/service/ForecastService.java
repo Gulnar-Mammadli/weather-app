@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -54,7 +56,7 @@ public class ForecastService {
                 .collect(Collectors.toList());
     }
 
-    public Double getAverageMinTemperature(String current_date) throws IOException {
+    public BigDecimal getAverageMinTemperature(String current_date) throws IOException {
 
         List<Place> places = getPlaces(current_date);
         OptionalDouble average = places.stream()
@@ -64,7 +66,7 @@ public class ForecastService {
                 .average();
 
         if (average.isPresent()) {
-            return average.getAsDouble();
+            return BigDecimal.valueOf(average.getAsDouble()).setScale(2, RoundingMode.HALF_UP);
         }
 
         return null;
@@ -72,7 +74,7 @@ public class ForecastService {
     }
 
 
-    public Double getAverageMaxTemperature(String current_date) throws IOException {
+    public BigDecimal getAverageMaxTemperature(String current_date) throws IOException {
 
         OptionalDouble average = getPlaces(current_date).stream()
                 .map(Place::getTempMax)
@@ -80,7 +82,7 @@ public class ForecastService {
                 .mapToInt(Integer::parseInt)
                 .average();
         if (average.isPresent()) {
-            return average.getAsDouble();
+            return BigDecimal.valueOf(average.getAsDouble()).setScale(2, RoundingMode.HALF_UP);
         }
 
         return null;
@@ -91,10 +93,13 @@ public class ForecastService {
 
         LocalDate current_date = LocalDate.now();
         String date = current_date.toString();
-        Double averageMinTemperature = getAverageMinTemperature(date);
-        Double averageMaxTemperature = getAverageMaxTemperature(date);
+        BigDecimal averageMinTemperature = getAverageMinTemperature(date);
+        BigDecimal averageMaxTemperature = getAverageMaxTemperature(date);
 
-        String result = String.format("Average temperatures for %s: %f (min), %f (max)\n", date, averageMinTemperature, averageMaxTemperature);
+        String result = String.format("Average temperatures for %s: %.2f (min), %.2f (max)\n",
+                date,
+                averageMinTemperature,
+                averageMaxTemperature);
         System.out.println(result);
         File file = new File("average_temperature.txt");
         Files.write(Paths.get(file.toURI()), result.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
