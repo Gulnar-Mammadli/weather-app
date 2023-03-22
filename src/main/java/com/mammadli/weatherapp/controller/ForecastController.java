@@ -45,6 +45,11 @@ public class ForecastController {
         return forecastService.getNightForecast(date, place);
     }
 
+    @GetMapping("/average/date/{date}")
+    public String getAverage(@PathVariable String date) throws IOException{
+        return forecastService.readFile(date);
+    }
+
 }
 
 

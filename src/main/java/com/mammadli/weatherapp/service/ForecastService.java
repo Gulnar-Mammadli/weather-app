@@ -18,10 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -132,5 +129,21 @@ public class ForecastService {
                         .equalsIgnoreCase(place.replaceAll("[^a-zA-Z]+", "").trim()))
                 .findFirst();
         return result.orElse(null);
+    }
+
+    public String readFile(String date) throws IOException {
+        List<String> list = new ArrayList<>();
+        List<String> lines = Files.readAllLines(Paths.get("average_temperature.txt"));
+        for (String line : lines) {
+            int index = line.indexOf(":");
+            String time = line.substring("Average temperatures for ".length(), index);
+            if (time.equals(date)) {
+                list.add(line);
+            }
+        }
+        if (!list.isEmpty()) {
+            return list.get(list.size() - 1);
+        }
+        return null;
     }
 }
