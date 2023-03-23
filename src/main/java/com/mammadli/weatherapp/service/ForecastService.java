@@ -53,7 +53,7 @@ public class ForecastService {
                 .collect(Collectors.toList());
     }
 
-    public BigDecimal getAverageMinTemperature(String current_date) throws IOException {
+    private BigDecimal getAverageMinTemperature(String current_date) throws IOException {
 
         List<Place> places = getPlaces(current_date);
         OptionalDouble average = places.stream()
@@ -71,7 +71,7 @@ public class ForecastService {
     }
 
 
-    public BigDecimal getAverageMaxTemperature(String current_date) throws IOException {
+    private BigDecimal getAverageMaxTemperature(String current_date) throws IOException {
 
         OptionalDouble average = getPlaces(current_date).stream()
                 .map(Place::getTempMax)
@@ -93,19 +93,22 @@ public class ForecastService {
         BigDecimal averageMinTemperature = getAverageMinTemperature(date);
         BigDecimal averageMaxTemperature = getAverageMaxTemperature(date);
 
-        String result = String.format("Average temperatures for %s: %.2f (min), %.2f (max)\n",
+        String result = String.format("Average temperatures for %s: %.4f (min), %.4f (max)\n",
                 date,
                 averageMinTemperature,
                 averageMaxTemperature);
-        System.out.println(result);
         File file = new File("average_temperature.txt");
         Files.write(Paths.get(file.toURI()), result.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        System.out.println(file.getAbsoluteFile());
     }
 
     public Place getForecast(String date, String place) throws IOException {
 
         List<Forecast> list = getAll().getForecastList();
+        Optional<Forecast.Day> day = list.stream()
+                .filter(forecast -> forecast.getDate().equals(date))
+                .map(Forecast::getDay)
+                .findFirst();
+
         Optional<Place> result = list.stream()
                 .filter(forecast -> forecast.getDate().equals(date))
                 .flatMap(forecast ->
@@ -113,7 +116,18 @@ public class ForecastService {
                 .filter(p -> p.getName().replaceAll("[^a-zA-Z]+", "").trim()
                         .equalsIgnoreCase(place.replaceAll("[^a-zA-Z]+", "").trim()))
                 .findFirst();
-        return result.orElse(null);
+
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+
+            Place place1 = new Place();
+            place1.setPhenomenon(day.get().getPhenomenon());
+            place1.setTempMin(day.get().getTempMin());
+            place1.setTempMax(day.get().getTempMax());
+            place1.setName("No info for this city. This is general info for day");
+            return place1;
+        }
 
     }
 
@@ -131,19 +145,36 @@ public class ForecastService {
         return result.orElse(null);
     }
 
-    public String readFile(String date) throws IOException {
-        List<String> list = new ArrayList<>();
-        List<String> lines = Files.readAllLines(Paths.get("average_temperature.txt"));
-        for (String line : lines) {
-            int index = line.indexOf(":");
-            String time = line.substring("Average temperatures for ".length(), index);
-            if (time.equals(date)) {
-                list.add(line);
-            }
-        }
-        if (!list.isEmpty()) {
-            return list.get(list.size() - 1);
-        }
-        return null;
+    public List<String> getTextInfo(String date) throws IOException {
+        List<Forecast> list = getAll().getForecastList();
+        List<String> strings = new ArrayList<>();
+        Optional<String> s1 = list.stream()
+                .filter(forecast -> forecast.getDate().equals(date))
+                .map(Forecast::getDay)
+                .map(day -> day.getText())
+                .findFirst();
+
+        Optional<String> s2 = list.stream()
+                .filter(forecast -> forecast.getDate().equals(date))
+                .map(Forecast::getNight)
+                .map(day -> day.getText())
+                .findFirst();
+
+        strings.add(0, s1.orElse(null));
+        strings.add(1, s2.orElse(null));
+        return strings;
     }
+
+
+    //    TODO remove
+    public String getNightInfo(String date) throws IOException {
+        List<Forecast> list = getAll().getForecastList();
+        Optional<String> s = list.stream()
+                .filter(forecast -> forecast.getDate().equals(date))
+                .map(Forecast::getNight)
+                .map(day -> day.getText())
+                .findFirst();
+        return s.orElse(null);
+    }
+
 }

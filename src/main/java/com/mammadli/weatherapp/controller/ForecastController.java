@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -24,17 +23,6 @@ public class ForecastController {
         return forecastService.getAll().getForecastList();
     }
 
-    @GetMapping("/min/{current_date}")
-    public BigDecimal getAverageMinTemperature(@PathVariable String current_date) throws IOException {
-        return forecastService.getAverageMinTemperature(current_date);
-    }
-
-    @GetMapping("/max/{current_date}")
-    public BigDecimal getAverageMaxTemperature(@PathVariable String current_date) throws IOException {
-        return forecastService.getAverageMaxTemperature(current_date);
-    }
-
-
     @GetMapping("/date/{date}/place/{place}")
     public Place getForecast(@PathVariable String date, @PathVariable String place) throws IOException {
         return forecastService.getForecast(date, place);
@@ -45,11 +33,10 @@ public class ForecastController {
         return forecastService.getNightForecast(date, place);
     }
 
-    @GetMapping("/average/date/{date}")
-    public String getAverage(@PathVariable String date) throws IOException{
-        return forecastService.readFile(date);
+    @GetMapping("/text/date/{date}")
+    public List<String> getText(@PathVariable String date) throws IOException{
+        return forecastService.getTextInfo(date);
     }
-
 }
 
 
