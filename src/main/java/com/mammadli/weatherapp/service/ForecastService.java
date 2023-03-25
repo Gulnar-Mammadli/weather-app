@@ -92,13 +92,14 @@ public class ForecastService {
         String date = current_date.toString();
         BigDecimal averageMinTemperature = getAverageMinTemperature(date);
         BigDecimal averageMaxTemperature = getAverageMaxTemperature(date);
-
-        String result = String.format("Average temperatures for %s: %.4f (min), %.4f (max)\n",
-                date,
-                averageMinTemperature,
-                averageMaxTemperature);
         File file = new File("average_temperature.txt");
-        Files.write(Paths.get(file.toURI()), result.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        if (averageMinTemperature != null && averageMaxTemperature != null) {
+            String result = String.format("Average temperatures for %s: %.2f (min), %.2f (max)\n",
+                    date,
+                    averageMinTemperature,
+                    averageMaxTemperature);
+            Files.write(Paths.get(file.toURI()), result.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        }
     }
 
     public Place getForecast(String date, String place) throws IOException {
@@ -116,10 +117,14 @@ public class ForecastService {
                 .filter(p -> p.getName().replaceAll("[^a-zA-Z]+", "").trim()
                         .equalsIgnoreCase(place.replaceAll("[^a-zA-Z]+", "").trim()))
                 .findFirst();
+        Place nightPlace = getNightForecast(date,place);
 
         if (result.isPresent()) {
-            return result.get();
-        } else {
+            Place value = result.get();
+            if(nightPlace != null) value.setTempMin(nightPlace.getTempMin());
+
+            return value;
+        } else if (day.isPresent()) {
 
             Place place1 = new Place();
             place1.setPhenomenon(day.get().getPhenomenon());
@@ -128,7 +133,7 @@ public class ForecastService {
             place1.setName("No info for this city. This is general info for day");
             return place1;
         }
-
+        return null;
     }
 
 
@@ -164,17 +169,4 @@ public class ForecastService {
         strings.add(1, s2.orElse(null));
         return strings;
     }
-
-
-    //    TODO remove
-    public String getNightInfo(String date) throws IOException {
-        List<Forecast> list = getAll().getForecastList();
-        Optional<String> s = list.stream()
-                .filter(forecast -> forecast.getDate().equals(date))
-                .map(Forecast::getNight)
-                .map(day -> day.getText())
-                .findFirst();
-        return s.orElse(null);
-    }
-
 }
